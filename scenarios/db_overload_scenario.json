@@ -1,0 +1,70 @@
+{
+  "incident_id": "INC-2026-0892",
+  "title": "Database CPU Overload & Heavy Unindexed Query Contention",
+  "description": "API Gateway experiences high latency across all endpoints due to unindexed query lock contention in database-cluster.",
+  "timestamp_start": "2026-09-26T11:15:00Z",
+  "affected_services": ["database-cluster", "catalog-service", "api-gateway"],
+  "telemetry": [
+    {
+      "timestamp": "2026-09-26T11:15:10Z",
+      "source": "prometheus",
+      "service": "database-cluster",
+      "event_type": "METRIC",
+      "severity": "WARNING",
+      "message": "Database CPU utilization rising above 80%",
+      "metric_name": "cpu_utilization_percent",
+      "metric_value": 84.2
+    },
+    {
+      "timestamp": "2026-09-26T11:16:05Z",
+      "source": "app_log",
+      "service": "catalog-service",
+      "event_type": "LOG",
+      "severity": "WARN",
+      "message": "Heavy unindexed query executed: SELECT * FROM products WHERE search_tags LIKE '%sale%' ORDER BY created_at DESC",
+      "metadata": {"query_duration_ms": 12400}
+    },
+    {
+      "timestamp": "2026-09-26T11:17:00Z",
+      "source": "prometheus",
+      "service": "database-cluster",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "Database CPU maxed out",
+      "metric_name": "cpu_utilization_percent",
+      "metric_value": 99.4
+    },
+    {
+      "timestamp": "2026-09-26T11:17:30Z",
+      "source": "prometheus",
+      "service": "catalog-service",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "Catalog API latency spike",
+      "metric_name": "http_p95_latency_ms",
+      "metric_value": 6200.0
+    },
+    {
+      "timestamp": "2026-09-26T11:18:00Z",
+      "source": "app_log",
+      "service": "api-gateway",
+      "event_type": "ERROR",
+      "severity": "ERROR",
+      "message": "Gateway Timeout 504 on downstream catalog-service requests"
+    },
+    {
+      "timestamp": "2026-09-26T11:18:20Z",
+      "source": "prometheus",
+      "service": "api-gateway",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "HTTP 504 Error rate elevated",
+      "metric_name": "http_error_rate_percent",
+      "metric_value": 44.1
+    }
+  ],
+  "expected_root_cause": "Unindexed catalog search queries consuming 99% DB CPU causing gateway timeouts",
+  "ground_truth_remediation": "DISABLE_FEATURE",
+  "ground_truth_target": "catalog-service",
+  "ground_truth_feature_flag": "ENABLE_UNINDEXED_TAG_SEARCH"
+}

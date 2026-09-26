@@ -1,0 +1,110 @@
+{
+  "incident_id": "INC-2026-0891",
+  "title": "Checkout Service Database Connection Pool Exhaustion",
+  "description": "High failure rate and extreme latency reported on checkout-service following release v2.8.1.",
+  "timestamp_start": "2026-09-26T10:00:00Z",
+  "affected_services": ["checkout-service", "database-cluster"],
+  "telemetry": [
+    {
+      "timestamp": "2026-09-26T10:02:10Z",
+      "source": "deployment_log",
+      "service": "checkout-service",
+      "event_type": "DEPLOYMENT",
+      "severity": "INFO",
+      "message": "Deployment completed successfully. Image: registry.internal/checkout:v2.8.1 (Git commit 4f9a12c)",
+      "deployment_version": "v2.8.1"
+    },
+    {
+      "timestamp": "2026-09-26T10:03:00Z",
+      "source": "app_log",
+      "service": "checkout-service",
+      "event_type": "LOG",
+      "severity": "INFO",
+      "message": "Initializing checkout service worker pool with max_db_connections=10",
+      "deployment_version": "v2.8.1"
+    },
+    {
+      "timestamp": "2026-09-26T10:04:13Z",
+      "source": "prometheus",
+      "service": "database-cluster",
+      "event_type": "METRIC",
+      "severity": "WARNING",
+      "message": "DB connection pool utilization reached threshold",
+      "metric_name": "db_connection_pool_utilization_percent",
+      "metric_value": 85.5
+    },
+    {
+      "timestamp": "2026-09-26T10:04:45Z",
+      "source": "prometheus",
+      "service": "database-cluster",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "DB connection pool near saturation",
+      "metric_name": "db_connection_pool_utilization_percent",
+      "metric_value": 97.2
+    },
+    {
+      "timestamp": "2026-09-26T10:05:02Z",
+      "source": "app_log",
+      "service": "checkout-service",
+      "event_type": "ERROR",
+      "severity": "ERROR",
+      "message": "POOL_TIMEOUT: Failed to acquire database connection after 5000ms. Active connections: 10/10. Wait queue size: 142",
+      "deployment_version": "v2.8.1"
+    },
+    {
+      "timestamp": "2026-09-26T10:05:18Z",
+      "source": "app_log",
+      "service": "checkout-service",
+      "event_type": "ERROR",
+      "severity": "ERROR",
+      "message": "POOL_TIMEOUT: Connection leak suspected in CheckoutSessionHandler.java:142. Connections not returned to pool",
+      "deployment_version": "v2.8.1"
+    },
+    {
+      "timestamp": "2026-09-26T10:05:41Z",
+      "source": "prometheus",
+      "service": "checkout-service",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "HTTP 500 Error rate spike detected",
+      "metric_name": "http_error_rate_percent",
+      "metric_value": 38.7
+    },
+    {
+      "timestamp": "2026-09-26T10:06:05Z",
+      "source": "prometheus",
+      "service": "checkout-service",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "P95 latency breach",
+      "metric_name": "http_p95_latency_ms",
+      "metric_value": 4820.0
+    },
+    {
+      "timestamp": "2026-09-26T10:06:20Z",
+      "source": "opentelemetry",
+      "service": "checkout-service",
+      "event_type": "TRACE",
+      "severity": "ERROR",
+      "message": "Trace 9a8f2c: POST /api/checkout failed at DB connection wait timeout (+4750ms)",
+      "trace_id": "trace-9a8f2c710a",
+      "status_code": 500,
+      "latency": 4850.0
+    },
+    {
+      "timestamp": "2026-09-26T10:06:45Z",
+      "source": "prometheus",
+      "service": "checkout-service",
+      "event_type": "METRIC",
+      "severity": "WARNING",
+      "message": "Throughput drop detected",
+      "metric_name": "requests_per_minute",
+      "metric_value": 410.0
+    }
+  ],
+  "expected_root_cause": "Checkout service v2.8.1 introduced connection leak leading to DB connection pool exhaustion",
+  "ground_truth_remediation": "ROLLBACK_SERVICE",
+  "ground_truth_target": "checkout-service",
+  "ground_truth_rollback_version": "v2.8.0"
+}

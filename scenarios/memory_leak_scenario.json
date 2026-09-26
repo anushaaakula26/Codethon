@@ -1,0 +1,48 @@
+{
+  "incident_id": "INC-2026-0894",
+  "title": "Recommendation Engine Heap Memory Growth & GC Pause Death Spiral",
+  "description": "Gradual heap consumption in recommendation-service resulting in 15s garbage collection pauses and OOM restarts.",
+  "timestamp_start": "2026-09-26T15:20:00Z",
+  "affected_services": ["recommendation-service"],
+  "telemetry": [
+    {
+      "timestamp": "2026-09-26T15:21:00Z",
+      "source": "prometheus",
+      "service": "recommendation-service",
+      "event_type": "METRIC",
+      "severity": "WARNING",
+      "message": "Heap memory usage increased steadily",
+      "metric_name": "jvm_memory_used_bytes",
+      "metric_value": 3800000000.0
+    },
+    {
+      "timestamp": "2026-09-26T15:23:30Z",
+      "source": "prometheus",
+      "service": "recommendation-service",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "JVM GC Pause duration exceeded 12000ms",
+      "metric_name": "jvm_gc_pause_ms",
+      "metric_value": 14800.0
+    },
+    {
+      "timestamp": "2026-09-26T15:24:10Z",
+      "source": "app_log",
+      "service": "recommendation-service",
+      "event_type": "ERROR",
+      "severity": "CRITICAL",
+      "message": "java.lang.OutOfMemoryError: Java heap space at UserVectorCache.put(UserVectorCache.java:89)"
+    },
+    {
+      "timestamp": "2026-09-26T15:24:25Z",
+      "source": "app_log",
+      "service": "recommendation-service",
+      "event_type": "LOG",
+      "severity": "CRITICAL",
+      "message": "Kubelet container restart limit reached. Restart count: 4"
+    }
+  ],
+  "expected_root_cause": "Unbounded cache growth in UserVectorCache resulting in heap memory leak & GC pause",
+  "ground_truth_remediation": "RESTART_SERVICE",
+  "ground_truth_target": "recommendation-service"
+}

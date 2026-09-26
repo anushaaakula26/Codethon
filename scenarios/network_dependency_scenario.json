@@ -1,0 +1,51 @@
+{
+  "incident_id": "INC-2026-0893",
+  "title": "Payment Gateway Timeout & Downstream Dependency Cascading Failure",
+  "description": "Payment Gateway dependency connection timed out, causing thread pool starvation in payment-service.",
+  "timestamp_start": "2026-09-26T14:00:00Z",
+  "affected_services": ["payment-service", "external-payment-gateway", "checkout-service"],
+  "telemetry": [
+    {
+      "timestamp": "2026-09-26T14:01:05Z",
+      "source": "opentelemetry",
+      "service": "external-payment-gateway",
+      "event_type": "TRACE",
+      "severity": "ERROR",
+      "message": "Outbound HTTP call to api.stripe-mock.internal timed out after 30000ms",
+      "trace_id": "trace-881b-payment",
+      "status_code": 504,
+      "latency": 30000.0
+    },
+    {
+      "timestamp": "2026-09-26T14:02:10Z",
+      "source": "app_log",
+      "service": "payment-service",
+      "event_type": "ERROR",
+      "severity": "ERROR",
+      "message": "THREAD_POOL_EXHAUSTION: All 50 worker threads blocked waiting for payment gateway response"
+    },
+    {
+      "timestamp": "2026-09-26T14:03:00Z",
+      "source": "prometheus",
+      "service": "payment-service",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "Payment service HTTP 503 error rate spike",
+      "metric_name": "http_error_rate_percent",
+      "metric_value": 62.4
+    },
+    {
+      "timestamp": "2026-09-26T14:03:45Z",
+      "source": "prometheus",
+      "service": "checkout-service",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "Checkout service cascading failure: 503 from payment dependency",
+      "metric_name": "http_error_rate_percent",
+      "metric_value": 41.2
+    }
+  ],
+  "expected_root_cause": "External payment gateway timeout causing payment-service thread starvation",
+  "ground_truth_remediation": "RESTART_DEPENDENCY",
+  "ground_truth_target": "payment-service"
+}

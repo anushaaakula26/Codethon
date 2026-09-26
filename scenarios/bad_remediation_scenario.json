@@ -1,0 +1,49 @@
+{
+  "incident_id": "INC-2026-0895",
+  "title": "Failed Remediation Case: Service Scaling Under DB Bottleneck",
+  "description": "Demonstrates self-validation detecting an ineffective/detrimental remediation (Scaling pods under DB exhaustion worsens pool contention), triggering sandbox rollback and proposing correct fix.",
+  "timestamp_start": "2026-09-26T16:00:00Z",
+  "affected_services": ["checkout-service", "database-cluster"],
+  "telemetry": [
+    {
+      "timestamp": "2026-09-26T16:01:00Z",
+      "source": "deployment_log",
+      "service": "checkout-service",
+      "event_type": "DEPLOYMENT",
+      "severity": "INFO",
+      "message": "Deployment completed. Version: v2.9.0-rc1"
+    },
+    {
+      "timestamp": "2026-09-26T16:02:15Z",
+      "source": "prometheus",
+      "service": "database-cluster",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "Database connection saturation",
+      "metric_name": "db_connection_pool_utilization_percent",
+      "metric_value": 98.1
+    },
+    {
+      "timestamp": "2026-09-26T16:03:00Z",
+      "source": "app_log",
+      "service": "checkout-service",
+      "event_type": "ERROR",
+      "severity": "ERROR",
+      "message": "POOL_TIMEOUT: Connection pool exhausted. 0 connections available"
+    },
+    {
+      "timestamp": "2026-09-26T16:03:45Z",
+      "source": "prometheus",
+      "service": "checkout-service",
+      "event_type": "METRIC",
+      "severity": "CRITICAL",
+      "message": "High HTTP 500 error rate",
+      "metric_name": "http_error_rate_percent",
+      "metric_value": 42.5
+    }
+  ],
+  "initial_faulty_remediation": "SCALE_SERVICE",
+  "initial_faulty_reason": "Naively scale checkout-service replicas from 3 to 10 to absorb request surge (will worsen DB connection contention!)",
+  "expected_alternative_remediation": "ROLLBACK_SERVICE",
+  "ground_truth_target": "checkout-service"
+}
