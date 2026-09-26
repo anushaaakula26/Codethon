@@ -10,11 +10,18 @@ export default function AuditView() {
     fetch('http://localhost:8000/api/audit')
       .then((res) => res.json())
       .then((json) => {
-        setLogs(json.reverse()); // latest first
+        if (Array.isArray(json)) {
+          setLogs([...json].reverse()); // latest first
+        } else if (json && Array.isArray(json.logs)) {
+          setLogs([...json.logs].reverse());
+        } else {
+          setLogs([]);
+        }
         setLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load audit trail:', err);
+        setLogs([]);
         setLoading(false);
       });
   };

@@ -367,6 +367,14 @@ class UpdateSettingsRequest(BaseModel):
     presidio_pii_redaction: bool
     azure_prompt_shields: bool
 
+@app.get("/api/audit")
+def get_audit_trail():
+    return [l.dict() for l in audit_trail.get_logs()]
+
+@app.get("/api/evaluation")
+def get_evaluation():
+    return evaluation_suite.run_benchmark()
+
 @app.get("/api/settings")
 def get_settings():
     return platform_settings
@@ -381,3 +389,4 @@ def update_settings(req: UpdateSettingsRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
