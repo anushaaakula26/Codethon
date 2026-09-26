@@ -1,15 +1,13 @@
 import React from 'react';
-import { ShieldCheck, Cpu, Upload, Search, FileText, Sparkles, UserCheck, Settings, Layers } from 'lucide-react';
+import { ShieldCheck, Cpu, Upload, Search, FileText, Sparkles, UserCheck, BarChart3, Clock } from 'lucide-react';
 
-export default function Navbar({ activeSlice, setActiveSlice, costData, activeIncidentId, dataOrigin }) {
+export default function Navbar({ activeTab, setActiveTab, costData, activeIncidentId, dataOrigin }) {
   const steps = [
-    { num: 1, label: '1. Upload Data', icon: Upload },
-    { num: 2, label: '2. Investigate', icon: Search },
-    { num: 3, label: '3. Evidence', icon: FileText },
-    { num: 4, label: '4. Recommended Fix', icon: Sparkles },
-    { num: 5, label: '5. Approve & Execute', icon: UserCheck },
-    { num: 6, label: '6. Change Tickets', icon: Layers },
-    { num: 7, label: '7. Platform Settings', icon: Settings },
+    { id: 'upload', label: '1. Upload Data', icon: Upload },
+    { id: 'investigate', label: '2. Investigate', icon: Search },
+    { id: 'evidence', label: '3. Evidence', icon: FileText },
+    { id: 'remediation', label: '4. Recommended Fix', icon: Sparkles },
+    { id: 'execute', label: '5. Approve & Execute', icon: UserCheck },
   ];
 
   return (
@@ -45,7 +43,7 @@ export default function Navbar({ activeSlice, setActiveSlice, costData, activeIn
             </span>
             {dataOrigin === 'UPLOADED_DATA' ? (
               <span className="badge badge-success" style={{ fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.2)', color: '#6ee7b7' }}>
-                UPLOADED DATA (LIVE ANALYSIS)
+                UPLOADED DATA
               </span>
             ) : (
               <span className="badge badge-info" style={{ fontSize: '0.65rem', background: 'rgba(59, 130, 246, 0.2)', color: '#93c5fd' }}>
@@ -59,19 +57,19 @@ export default function Navbar({ activeSlice, setActiveSlice, costData, activeIn
         </div>
       </div>
 
-      {/* 7 Modular Vertical Slices Journey Bar */}
+      {/* 5 Modular Vertical Slices Journey Bar */}
       <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-card)', padding: '4px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
         {steps.map((step) => {
           const Icon = step.icon;
-          const isActive = activeSlice === step.num;
+          const isActive = activeTab === step.id;
           return (
             <button
-              key={step.num}
-              onClick={() => setActiveSlice(step.num)}
+              key={step.id}
+              onClick={() => setActiveTab(step.id)}
               className={isActive ? 'btn-primary' : 'btn-secondary'}
               style={{
-                padding: '7px 11px',
-                fontSize: '0.8rem',
+                padding: '7px 12px',
+                fontSize: '0.82rem',
                 borderRadius: '6px',
                 background: isActive ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'transparent',
                 border: 'none',
@@ -84,8 +82,24 @@ export default function Navbar({ activeSlice, setActiveSlice, costData, activeIn
         })}
       </div>
 
-      {/* Cost Pill */}
+      {/* Secondary Benchmark & Audit Links + Cost Pill */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <button
+          onClick={() => setActiveTab('evaluation')}
+          className={activeTab === 'evaluation' ? 'btn-primary' : 'btn-secondary'}
+          style={{ padding: '6px 10px', fontSize: '0.78rem' }}
+        >
+          <BarChart3 size={14} /> Evaluation
+        </button>
+
+        <button
+          onClick={() => setActiveTab('audit')}
+          className={activeTab === 'audit' ? 'btn-primary' : 'btn-secondary'}
+          style={{ padding: '6px 10px', fontSize: '0.78rem' }}
+        >
+          <Clock size={14} /> Audit Trail
+        </button>
+
         <div style={{
           background: 'rgba(30, 41, 59, 0.8)',
           border: '1px solid var(--border-color)',

@@ -5,13 +5,13 @@ import Slice2Investigate from './slices/Slice2Investigate';
 import Slice3Evidence from './slices/Slice3Evidence';
 import Slice4Remediation from './slices/Slice4Remediation';
 import Slice5Execute from './slices/Slice5Execute';
-import Slice6Tickets from './slices/Slice6Tickets';
-import Slice7Settings from './slices/Slice7Settings';
+import EvaluationView from './components/EvaluationView';
+import AuditView from './components/AuditView';
 
 const API_BASE = 'http://localhost:8000';
 
 export default function App() {
-  const [activeSlice, setActiveSlice] = useState(1);
+  const [activeTab, setActiveTab] = useState('upload');
   const [loading, setLoading] = useState(false);
   const [connectors, setConnectors] = useState([]);
   const [ingestSummary, setIngestSummary] = useState(null);
@@ -81,7 +81,7 @@ export default function App() {
       setExecutionResult(null);
 
       // Advance to Slice 2 Investigate
-      setActiveSlice(2);
+      setActiveTab('investigate');
     } catch (err) {
       console.error('Error loading scenario:', err);
     } finally {
@@ -135,7 +135,7 @@ export default function App() {
       setValidation(null);
       setExecutionResult(null);
 
-      setActiveSlice(2);
+      setActiveTab('investigate');
     } catch (err) {
       console.error('Error uploading file:', err);
     } finally {
@@ -186,10 +186,10 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-dark)' }}>
-      {/* Navbar with 7 Vertical Slice Stepper Bar */}
+      {/* Navbar with 5 Vertical Slice Stepper Bar */}
       <Navbar
-        activeSlice={activeSlice}
-        setActiveSlice={setActiveSlice}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         costData={{ total_cost_usd: routing?.estimated_cost_usd || 0.0012 }}
         activeIncidentId={incidentId}
         dataOrigin={dataOrigin}
@@ -197,7 +197,7 @@ export default function App() {
 
       {/* Main Journey Container */}
       <main style={{ padding: '24px', paddingBottom: '60px' }}>
-        {activeSlice === 1 && (
+        {activeTab === 'upload' && (
           <Slice1Upload
             onSelectScenario={handleSelectScenario}
             onFileUpload={handleFileUpload}
@@ -207,36 +207,36 @@ export default function App() {
           />
         )}
 
-        {activeSlice === 2 && (
+        {activeTab === 'investigate' && (
           <Slice2Investigate
             investigation={investigation}
             verification={verification}
-            onNextStep={() => setActiveSlice(3)}
+            onNextStep={() => setActiveTab('evidence')}
             loading={loading}
           />
         )}
 
-        {activeSlice === 3 && (
+        {activeTab === 'evidence' && (
           <Slice3Evidence
             investigation={investigation}
             verification={verification}
-            onNextStep={() => setActiveSlice(4)}
+            onNextStep={() => setActiveTab('remediation')}
             loading={loading}
           />
         )}
 
-        {activeSlice === 4 && (
+        {activeTab === 'remediation' && (
           <Slice4Remediation
             plan={plan}
             experiment={experiment}
             validation={validation}
             onRunExperiment={handleRunSandboxExperiment}
-            onNextStep={() => setActiveSlice(5)}
+            onNextStep={() => setActiveTab('execute')}
             loading={loading}
           />
         )}
 
-        {activeSlice === 5 && (
+        {activeTab === 'execute' && (
           <Slice5Execute
             plan={plan}
             validation={validation}
@@ -246,12 +246,12 @@ export default function App() {
           />
         )}
 
-        {activeSlice === 6 && (
-          <Slice6Tickets />
+        {activeTab === 'evaluation' && (
+          <EvaluationView />
         )}
 
-        {activeSlice === 7 && (
-          <Slice7Settings />
+        {activeTab === 'audit' && (
+          <AuditView />
         )}
       </main>
     </div>
